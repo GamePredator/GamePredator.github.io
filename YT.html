@@ -1,1 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Predator</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="Game_logo.png">
+<style>
+/* 🎨 CSS Variables & Base Setup */
+:root {
+  --bg-dark: #070707; /* Slightly darker base */
+  --card-bg: rgba(18, 18, 18, 0.75); /* Slight opacity boost */
+  --text-main: #f0f0f0; /* Softer white */
+  --text-secondary: #a0a0a0;
+  --accent: #007bff; /* Primary Blue */
+  --accent2: #ff005d; /* Secondary Pink/Red */
+  --radius-lg: 24px; /* Larger card radius */
+  --radius-md: 14px; /* Button/item radius */
+  --border-color: #1e1e1e;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at 20% 20%, #101010, #030303); /* Richer gradient */
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* 🖼️ Layout & Container */
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* 🧭 NAVBAR */
+.navbar {
+  background: rgba(10, 10, 10, 0.9); /* Darker, more solid background */
+  backdrop-filter: blur(25px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 15px 25px; /* Slightly adjusted padding */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.navbar > div { /* Target the inner flex container */
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.navbar img {
+  height: 50px; /* Slightly smaller logo */
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.3); /* Subtle accent glow */
+}
+.navbar h2 {
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--text-main);
+}
+
+
+/* 💳 CARD BASE */
+.card {
+  background: var(--card-bg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  backdrop-filter: blur(30px); /* Increased blur */
+  position: relative; /* Needed for pseudo-element positioning */
+  overflow: hidden; /* Ensures the gradient border stays within bounds */
+  transition: transform 0.3s ease-out; /* Added transform transition for hover */
+}
+
+/* Animated Gradient Border for Cards */
+.card::before {
+  content: "";
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: conic-gradient(from 0deg at 50% 50%, 
+              #ff005d 0%, #007bff 20%, #00ffaa 40%, 
+              #ffeb3b 60%, #e62117 80%, #ff005d 100%);
+  animation: rotateBorder 8s linear infinite; /* Animation for the gradient */
+  z-index: -1;
+  border-radius: var(--radius-lg);
+  /* New: Set opacity to 0 by default and add transition */
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* Clip the gradient to create the border effect (unchanged) */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  z-index: -1;
+}
+
+/* 🟢 Activation States: Hover and Focus-Within 🟢 */
+.card:hover::before,
+.card:focus-within::before {
+  opacity: 1; /* Show the border on hover or if a child element has focus */
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Nice subtle lift on hover */
+}
+
+
+@keyframes rotateBorder {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card h3 {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 15px; /* Add spacing below heading */
+}
+.card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* 🔔 UPDATES SECTION */
+#updatesBox {
+  margin-top: 15px; /* Spacing for the content box */
+}
+.update-item {
+  background: rgba(30, 30, 30, 0.85); /* Darker background for updates */
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent2); /* Highlight bar */
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+.update-item:hover {
+  background: rgba(40, 40, 40, 0.9);
+}
+.update-item:last-child {
+  margin-bottom: 0;
+}
+
+
+/* 🔗 BUTTONS */
+.btn {
+  display: block;
+  text-align: center;
+  margin-top: 25px; /* Increased margin */
+  padding: 15px 25px;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none; /* Make sure it looks like a link */
+  letter-spacing: 0.5px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.sub-btn {
+  background: linear-gradient(135deg, #e62117, #ff5c5c); /* Brighter red end */
+  box-shadow: 0 4px 10px rgba(230, 33, 23, 0.5);
+}
+.whatsapp-btn {
+  background: linear-gradient(135deg, #075e54, #25d366); /* Darker, richer green start */
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.5);
+}
+
+/* 🎬 VIDEOS */
+.videos {
+  display: grid;
+  gap: 30px; /* Increased gap */
+  margin-top: 20px;
+  grid-template-columns: 1fr;
+}
+@media(min-width: 600px) {
+  .videos { grid-template-columns: repeat(2, 1fr); }
+  .subscribe-whatsapp { flex-direction: row; }
+}
+@media(min-width: 900px) {
+  .videos { grid-template-columns: repeat(3, 1fr); }
+}
+
+.video-box {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease-out;
+}
+.video-box:hover {
+  transform: translateY(-5px);
+}
+
+/* Gradient Border for Active Video */
+.video-box::before {
+  content: "";
+  position: absolute;
+  inset: -3px; /* Extend border slightly */
+  border-radius: 22px; /* Match card radius + inset */
+  padding: 3px;
+  background: linear-gradient(45deg, var(--accent), var(--accent2), #00ffaa); /* Smoother gradient */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none; /* Ensure no interference with clicks */
+}
+.video-active::before {
+  opacity: 1;
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.8); /* Glow effect */
+}
+
+.video-box iframe {
+  width: 100%;
+  height: 200px; /* Slightly adjusted height */
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  display: block; /* Removes any potential spacing issues */
+}
+
+.video-title {
+  text-align: center;
+  margin-top: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+.video-active .video-title {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* 👀 SEE ALL */
+.see-all {
+  text-align: center;
+  margin-top: 25px;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: color 0.3s;
+}
+.see-all:hover {
+  color: var(--accent2); /* Change color on hover */
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+  <div>
+    <img src="Game_logo.png">
+    <h2>Game Predator</h2>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="subscribe-whatsapp">
+    <div class="card" style="flex:1;">
+      <h3>🔴 Subscribe</h3>
+      <p>Get weekly gaming videos</p>
+      <a class="btn sub-btn" href="https://youtube.com/@gamepredatoryt?si=49N2ynVu5llM3QZ1">Subscribe Now</a>
+    </div>
+
+    <div class="card" style="flex:1;">
+      <h3>💬 WhatsApp</h3>
+      <p>Join WhatsApp for instant updates!</p>
+      <a class="btn whatsapp-btn" href="https://whatsapp.com/channel/0029VbC4x4R9mrGjPEm37c0v">Follow on WhatsApp</a>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>🔥 Latest Updates</h3>
+    <div id="updatesBox"></div>
+  </div>
+
+
+  <div class="card">
+    <h3>🎮 Latest Videos</h3>
+    <div id="videoList" class="videos"></div>
+    <div id="seeAllBtn" class="see-all">See All Videos →</div>
+  </div>
+
+</div>
+
+<script>
+/* LOAD DATA */
+let updates = JSON.parse(localStorage.getItem("latestUpdates") || "[]");
+let videos = JSON.parse(localStorage.getItem("videoData") || "[]");
+
+/* LOAD UPDATES */
+function loadUpdates() {
+  const box = document.getElementById("updatesBox");
+  
+  if (updates.length === 0) {
+    box.innerHTML = "<p style='color:#777'>No updates yet.</p>";
+    return;
+  }
+
+  box.innerHTML = updates
+      .map(u => `<div class='update-item'>${u}</div>`)
+      .join("");
+}
+
+loadUpdates();
+
+/* VIDEO EMBED HELPER */
+function embed(id){
+  return `https://www.youtube.com/embed/${id}`;
+}
+
+let showingAll = false;
+
+/* LOAD VIDEOS */
+function loadVideos(){
+  const list = document.getElementById("videoList");
+  list.innerHTML = "";
+
+  const show = showingAll ? videos : videos.slice(0,3);
+
+  show.forEach((v, index)=>{
+    list.innerHTML += `
+      <div class="video-box" onclick="setActive(${index})">
+        <iframe src="${embed(v.id)}" allowfullscreen></iframe>
+        <div class="video-title">${v.title}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("seeAllBtn").style.display =
+      videos.length > 3 ? "block" : "none";
+}
+
+loadVideos();
+
+/* HIGHLIGHT ACTIVE VIDEO */
+function setActive(i){
+  document.querySelectorAll(".video-box").forEach(v => v.classList.remove("video-active"));
+  document.querySelectorAll(".video-box")[i].classList.add("video-active");
+}
+
+/* SEE ALL BUTTON */
+document.getElementById("seeAllBtn").onclick = () => {
+  showingAll = true;
+  loadVideos();
+};
+</script>
+
+</body>
+</html>
