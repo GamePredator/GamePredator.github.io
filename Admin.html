@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* --- CSS VARIABLES --- */
+:root {
+  --bg-main: #0a0a0a;
+  --bg-card: #181818;
+  --bg-input: #2a2a2a;
+  --bg-item: #333333;
+  --text-main: #f0f0f0;
+  --color-primary: #007bff; /* Blue for primary button */
+  --color-hover: #0066cc;
+  --color-error: #ff4d4f;
+  --radius-lg: 16px;
+  --radius-sm: 8px;
+}
+
+/* --- BASE STYLES --- */
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  padding: 30px 20px;
+  text-align: center;
+  min-height: 100vh;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+/* --- BOX (CARD) STYLES --- */
+.box {
+  background: var(--bg-card);
+  padding: 25px;
+  border-radius: var(--radius-lg);
+  margin: 20px auto;
+  max-width: 500px;
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border: 1px solid #282828;
+}
+
+h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--color-primary);
+  border-bottom: 2px solid #333;
+  padding-bottom: 8px;
+}
+
+/* --- FORM ELEMENTS --- */
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  margin-top: 10px;
+  background: var(--bg-input);
+  color: var(--text-main);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  text-algin: center;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #888;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4);
+}
+
+/* --- BUTTONS --- */
+button {
+  padding: 10px 20px;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-main);
+  font-weight: 600;
+  margin-top: 15px;
+  transition: background 0.3s, transform 0.1s;
+  letter-spacing: 0.5px;
+}
+
+button:hover {
+  background: var(--color-hover);
+}
+button:active {
+  transform: scale(0.98);
+}
+
+/* Specific Delete Button (Optional, but good practice) */
+.item button {
+  background: #dc3545; /* Red for delete */
+  margin-top: 0;
+}
+.item button:hover {
+  background: #c82333;
+}
+
+/* --- LIST ITEMS --- */
+#updateList, #videoList {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #282828;
+}
+
+.item {
+  background: var(--bg-item);
+  padding: 12px 15px;
+  border-radius: var(--radius-sm);
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+.item:hover {
+  background: #444;
+}
+
+.item span {
+  /* Prevent text from wrapping too aggressively */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 100px); /* Leave room for the button */
+}
+
+/* --- MESSAGES --- */
+#errorMsg {
+  color: var(--color-error) !important;
+  font-weight: 500;
+  margin-top: 10px !important;
+}
+
+/* For the "No updates/videos yet" paragraph */
+.box > p {
+  color: #888;
+  margin-top: 10px;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<h2>Game Predator Admin</h2>
+
+<div id="loginBox" class="box">
+  <h3>Enter Password</h3>
+  <input type="password" id="adminPass" placeholder="Password">
+  <button onclick="checkPass()">Login</button>
+  <p id="errorMsg"></p>
+</div>
+
+<div id="panel" style="display:none;">
+
+  <div class="box">
+    <h3>📝 Add Latest Update</h3>
+    <input id="updateText" placeholder="Type new update...">
+    <button onclick="addUpdate()">Add Update</button>
+    <div id="updateList"></div>
+  </div>
+
+  <div class="box">
+    <h3>🎬 Add Video</h3>
+    <input id="videoTitle" placeholder="Video Title">
+    <input id="videoURL" placeholder="YouTube URL">
+    <button onclick="addVideo()">Add Video</button>
+    <div id="videoList"></div>
+  </div>
+
+</div>
+
+<script>
+/* ===== LOGIN ===== */
+function checkPass() {
+  const pass = document.getElementById("adminPass").value;
+  if (pass === "7211") {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("panel").style.display = "block";
+    loadAll();
+  } else {
+    document.getElementById("errorMsg").innerText = "❌ Wrong password!";
+  }
+}
+
+/* ===== LOCAL STORAGE HELPERS ===== */
+function save(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+function load(key) {
+  return JSON.parse(localStorage.getItem(key)) || [];
+}
+
+/* ===== UPDATES ===== */
+function addUpdate() {
+  const text = document.getElementById("updateText").value.trim();
+  if (!text) return alert("Enter an update!");
+
+  const updates = load("latestUpdates");
+  updates.unshift(text);
+  save("latestUpdates", updates);
+
+  document.getElementById("updateText").value = "";
+  showUpdates();
+}
+
+function showUpdates() {
+  const updates = load("latestUpdates");
+  const box = document.getElementById("updateList");
+
+  box.innerHTML = updates.length ? "" : "<p>No updates yet.</p>";
+
+  updates.forEach((text, i) => {
+    box.innerHTML += `
+      <div class="item">
+        <span>${text}</span>
+        <button onclick="deleteUpdate(${i})">Delete</button>
+      </div>`;
+  });
+}
+
+function deleteUpdate(i) {
+  const updates = load("latestUpdates");
+  updates.splice(i, 1);
+  save("latestUpdates", updates);
+  showUpdates();
+}
+
+/* ===== VIDEOS ===== */
+function extractID(url) {
+  const reg = /(?:v=|\.be\/)([a-zA-Z0-9_-]+)/;
+  const match = url.match(reg);
+  return match ? match[1] : null;
+}
+
+function addVideo() {
+  const title = document.getElementById("videoTitle").value.trim();
+  const url = document.getElementById("videoURL").value.trim();
+
+  if (!title || !url) return alert("Enter title and URL!");
+
+  const id = extractID(url);
+  if (!id) return alert("Invalid YouTube URL!");
+
+  const videos = load("videoData");
+  videos.unshift({ title, id });
+  save("videoData", videos);
+
+  document.getElementById("videoTitle").value = "";
+  document.getElementById("videoURL").value = "";
+
+  showVideos();
+}
+
+function showVideos() {
+  const videos = load("videoData");
+  const box = document.getElementById("videoList");
+
+  box.innerHTML = videos.length ? "" : "<p>No videos yet.</p>";
+
+  videos.forEach((v, i) => {
+    box.innerHTML += `
+      <div class="item">
+        <span>${v.title}</span>
+        <button onclick="deleteVideo(${i})">Delete</button>
+      </div>`;
+  });
+}
+
+function deleteVideo(i) {
+  const videos = load("videoData");
+  videos.splice(i, 1);
+  save("videoData", videos);
+  showVideos();
+}
+
+function loadAll() {
+  showUpdates();
+  showVideos();
+}
+</script>
+
+</body>
+</html>
